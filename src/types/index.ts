@@ -163,3 +163,20 @@ export interface StatsSummary {
   publicationsCount: number;
   partnersCount: number;
 }
+
+export type RoadmapStatus = 'Completed' | 'In Progress' | 'Planned';
+
+export interface RoadmapItem {
+  id: string;
+  phase: string;
+  year_range: string;
+  title: string;
+  subtitle?: string;
+  status: RoadmapStatus;
+  points: string[];
+  technologies?: string[];
+  deliverables?: string[];
+  display_order: number;
+  created_at?: string;
+  updated_at?: string;
+}

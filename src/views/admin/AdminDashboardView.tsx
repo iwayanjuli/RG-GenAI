@@ -16,7 +16,8 @@ import {
   Activity, 
   CheckCircle2, 
   Database,
-  Sparkles
+  Sparkles,
+  Milestone
 } from 'lucide-react';
 
 export const AdminDashboardView: React.FC = () => {
@@ -149,7 +150,7 @@ export const AdminDashboardView: React.FC = () => {
       </div>
 
       {/* Quick Action Shortcuts */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <Link
           to="/admin/projects"
           className="p-5 rounded-2xl bg-navy-900/50 border border-navy-800 hover:border-violet-500/40 transition-all flex items-center gap-4 group"
@@ -159,9 +160,24 @@ export const AdminDashboardView: React.FC = () => {
           </div>
           <div>
             <h4 className="text-sm font-bold text-white group-hover:text-violet-300 transition-colors">
-              Tambah Proyek Baru
+              Tambah Proyek
             </h4>
-            <p className="text-[11px] text-slate-400">Publikasikan inovasi model atau prototipe AI</p>
+            <p className="text-[11px] text-slate-400">Inovasi model AI</p>
+          </div>
+        </Link>
+
+        <Link
+          to="/admin/roadmap"
+          className="p-5 rounded-2xl bg-navy-900/50 border border-navy-800 hover:border-blue-500/40 transition-all flex items-center gap-4 group"
+        >
+          <div className="w-10 h-10 rounded-xl bg-blue-600/10 text-blue-400 border border-blue-500/30 flex items-center justify-center shrink-0">
+            <Milestone className="w-5 h-5" />
+          </div>
+          <div>
+            <h4 className="text-sm font-bold text-white group-hover:text-blue-300 transition-colors">
+              Peta Jalan Riset
+            </h4>
+            <p className="text-[11px] text-slate-400">Atur fase & capaian</p>
           </div>
         </Link>
 
@@ -174,9 +190,9 @@ export const AdminDashboardView: React.FC = () => {
           </div>
           <div>
             <h4 className="text-sm font-bold text-white group-hover:text-electric-300 transition-colors">
-              Tambah Publikasi Ilmiah
+              Tambah Publikasi
             </h4>
-            <p className="text-[11px] text-slate-400">Input paper jurnal, prosiding, atau BibTeX</p>
+            <p className="text-[11px] text-slate-400">Input paper atau BibTeX</p>
           </div>
         </Link>
 
@@ -189,9 +205,9 @@ export const AdminDashboardView: React.FC = () => {
           </div>
           <div>
             <h4 className="text-sm font-bold text-white group-hover:text-cyan-300 transition-colors">
-              Tambah Peneliti / Anggota
+              Kelola Peneliti
             </h4>
-            <p className="text-[11px] text-slate-400">Daftarkan dosen, asisten riset, atau mahasiswa</p>
+            <p className="text-[11px] text-slate-400">Dosen & asisten riset</p>
           </div>
         </Link>
       </div>

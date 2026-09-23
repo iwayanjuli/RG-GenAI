@@ -27,6 +27,7 @@ import { AdminLoginView } from './views/admin/AdminLoginView';
 import { AdminDashboardView } from './views/admin/AdminDashboardView';
 import { AdminMembersView } from './views/admin/AdminMembersView';
 import { AdminResearchView } from './views/admin/AdminResearchView';
+import { AdminRoadmapView } from './views/admin/AdminRoadmapView';
 import { AdminProjectsView } from './views/admin/AdminProjectsView';
 import { AdminPublicationsView } from './views/admin/AdminPublicationsView';
 import { AdminPartnersView } from './views/admin/AdminPartnersView';
@@ -80,6 +81,7 @@ export const App: React.FC = () => {
                 <Route index element={<AdminDashboardView />} />
                 <Route path="members" element={<AdminMembersView />} />
                 <Route path="research" element={<AdminResearchView />} />
+                <Route path="roadmap" element={<AdminRoadmapView />} />
                 <Route path="projects" element={<AdminProjectsView />} />
                 <Route path="publications" element={<AdminPublicationsView />} />
                 <Route path="partners" element={<AdminPartnersView />} />

@@ -1,4 +1,4 @@
-import { Member, ResearchArea, Project, Publication, Partner, ContactMessage } from '../types';
+import { Member, ResearchArea, Project, Publication, Partner, ContactMessage, RoadmapItem } from '../types';
 
 export const initialMembers: Member[] = [
   {
@@ -701,5 +701,72 @@ export const initialMessages: ContactMessage[] = [
     message: 'Halo tim Generative AI Undiksha, kami telah membaca makalah Anda mengenai EduGen-RAG. Perusahaan kami mengelola platform LMS untuk 40+ kampus swasta dan berkeinginan mendiskusikan lisensi teknologi atau pilot project bersama.',
     status: 'Unread',
     created_at: '2026-09-20T14:15:00Z'
+  }
+];
+
+export const initialRoadmap: RoadmapItem[] = [
+  {
+    id: 'rdm-1',
+    phase: 'Fase I',
+    year_range: '2023 - 2024',
+    title: 'Foundation & Infrastructure',
+    subtitle: 'Peletakan Pondasi Komputasi & Korpus Linguistik',
+    status: 'Completed',
+    points: [
+      'Penyusunan korpus linguistik bahasa daerah Bali & instrumen data lontar',
+      'Pembangunan cluster workstation GPU dan pipeline MLOps terintegrasi',
+      'Eksplorasi teknik parameter-efficient fine-tuning (LoRA, QLoRA)'
+    ],
+    technologies: ['PyTorch', 'Hugging Face', 'NVIDIA CUDA', 'LoRA / QLoRA'],
+    deliverables: ['Dataset Lontar Digital v1.0', 'Cluster Komputasi Lab FTK', 'Publikasi Benchmark LoRA'],
+    display_order: 1
+  },
+  {
+    id: 'rdm-2',
+    phase: 'Fase II',
+    year_range: '2024 - 2025',
+    title: 'Domain Adaptation & Multimodal Alignment',
+    subtitle: 'Adaptasi Model Berbahasa Lokal & VLM Budaya',
+    status: 'In Progress',
+    points: [
+      'Rilis open-weights Balinese-LLaMA dan transliterator VLM manuskrip lontar',
+      'Implementasi production RAG untuk kurikulum pendidikan tinggi Undiksha',
+      'Penyusunan benchmark evaluasi etika dan mitigasi bias model bahasa nusantara'
+    ],
+    technologies: ['LLaMA-3', 'Mistral', 'LangChain', 'Qdrant Vector DB', 'CLIP'],
+    deliverables: ['Model Balinese-LLaMA 8B', 'Platform EduGen-RAG Kampus', 'Dokumen Standar Etika AI'],
+    display_order: 2
+  },
+  {
+    id: 'rdm-3',
+    phase: 'Fase III',
+    year_range: '2025 - 2026',
+    title: 'Autonomous Agents & Intelligent Tutoring',
+    subtitle: 'Ekosistem Multi-Agen Pedagogis & Asesmen Adaptif',
+    status: 'Planned',
+    points: [
+      'Pengembangan sistem multi-agen otonom untuk asesmen adaptif perkuliahan',
+      'Integrasi multimodal real-time speech and gesture feedback interaktif',
+      'Pilot komersialisasi dan hilirisasi produk AI ke industri edutech nasional'
+    ],
+    technologies: ['CrewAI', 'LangGraph', 'vLLM', 'FastAPI', 'Whisper'],
+    deliverables: ['Sistem Asesmen Multi-Agen', 'Modul Voice-AI Asisten Tutor', '3 Paten Terdaftar'],
+    display_order: 3
+  },
+  {
+    id: 'rdm-4',
+    phase: 'Fase IV',
+    year_range: '2026 - 2028',
+    title: 'Global Impact & Cultural AI Preservation',
+    subtitle: 'Pusat Unggulan AI & Rujukan Digitalisasi Asia Tenggara',
+    status: 'Planned',
+    points: [
+      'Pusat rujukan digitalisasi warisan naskah kuno nusantara se-Asia Tenggara',
+      'Federated learning lintas perguruan tinggi untuk privasi data pendidikan',
+      'Kolaborasi penelitian model fondasi generasi berikutnya bersama lab dunia'
+    ],
+    technologies: ['Federated Learning', 'Large Multimodal Models', 'Decentralized AI'],
+    deliverables: ['PUI Generative AI Nasional', 'Aliansi Riset Internasional', 'Konsorsium ASEAN Lontar-AI'],
+    display_order: 4
   }
 ];

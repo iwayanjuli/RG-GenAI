@@ -12,13 +12,15 @@ import {
   LogOut, 
   ExternalLink,
   Shield,
-  Sparkles
+  Sparkles,
+  Milestone
 } from 'lucide-react';
 
 const ADMIN_LINKS = [
   { label: 'Ringkasan Statistik', path: '/admin', icon: LayoutDashboard },
   { label: 'Kelola Anggota Tim', path: '/admin/members', icon: Users },
   { label: 'Fokus Riset', path: '/admin/research', icon: Layers },
+  { label: 'Roadmap Riset', path: '/admin/roadmap', icon: Milestone },
   { label: 'Proyek Inovasi', path: '/admin/projects', icon: FolderKanban },
   { label: 'Publikasi Ilmiah', path: '/admin/publications', icon: BookOpen },
   { label: 'Mitra Kolaborasi', path: '/admin/partners', icon: Handshake },

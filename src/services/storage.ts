@@ -12,7 +12,8 @@ import {
   initialProjects, 
   initialPublications, 
   initialPartners, 
-  initialMessages 
+  initialMessages,
+  initialRoadmap
 } from '../data/mockData';
 
 const STORAGE_KEYS = {
@@ -22,6 +23,7 @@ const STORAGE_KEYS = {
   PUBLICATIONS: 'rg_genai_publications',
   PARTNERS: 'rg_genai_partners',
   MESSAGES: 'rg_genai_messages',
+  ROADMAP: 'rg_genai_roadmap',
 };
 
 // Initialize default storage with initial realistic data if not present
@@ -44,6 +46,9 @@ export function initLocalStorage(): void {
   }
   if (!localStorage.getItem(STORAGE_KEYS.MESSAGES)) {
     localStorage.setItem(STORAGE_KEYS.MESSAGES, JSON.stringify(initialMessages));
+  }
+  if (!localStorage.getItem(STORAGE_KEYS.ROADMAP)) {
+    localStorage.setItem(STORAGE_KEYS.ROADMAP, JSON.stringify(initialRoadmap));
   }
 }
 

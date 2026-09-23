@@ -203,3 +203,26 @@ CREATE POLICY "Allow authenticated full on publications" ON publications FOR ALL
 CREATE POLICY "Allow authenticated full on publication_authors" ON publication_authors FOR ALL USING (auth.role() = 'authenticated');
 CREATE POLICY "Allow authenticated full on partners" ON partners FOR ALL USING (auth.role() = 'authenticated');
 CREATE POLICY "Allow authenticated full on contact_messages" ON contact_messages FOR ALL USING (auth.role() = 'authenticated');
+
+-- 11. ROADMAP PHASES
+CREATE TABLE IF NOT EXISTS roadmap_phases (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    phase VARCHAR(100) NOT NULL,
+    year_range VARCHAR(50) NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    subtitle TEXT,
+    status VARCHAR(50) DEFAULT 'Planned' CHECK (status IN ('Completed', 'In Progress', 'Planned')),
+    points TEXT[] DEFAULT '{}',
+    technologies TEXT[] DEFAULT '{}',
+    deliverables TEXT[] DEFAULT '{}',
+    display_order INT DEFAULT 0,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_roadmap_status ON roadmap_phases(status);
+CREATE INDEX IF NOT EXISTS idx_roadmap_display_order ON roadmap_phases(display_order);
+
+ALTER TABLE roadmap_phases ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow public read access on roadmap_phases" ON roadmap_phases FOR SELECT USING (true);
+CREATE POLICY "Allow authenticated full on roadmap_phases" ON roadmap_phases FOR ALL USING (auth.role() = 'authenticated');

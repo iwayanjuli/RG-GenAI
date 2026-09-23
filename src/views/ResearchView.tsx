@@ -4,8 +4,9 @@ import { SectionTitle } from '../components/common/SectionTitle';
 import { EmptyState } from '../components/common/EmptyState';
 import { researchService } from '../services/researchService';
 import { projectService } from '../services/projectService';
-import { ResearchArea, Project } from '../types';
-import { siteConfig } from '../data/siteConfig';
+import { roadmapService } from '../services/roadmapService';
+import { ResearchArea, Project, RoadmapItem } from '../types';
+import { InteractiveRoadmap } from '../components/modules/research/InteractiveRoadmap';
 import { 
   Brain, 
   Database, 
@@ -41,9 +42,14 @@ const ICON_MAP: Record<string, React.ElementType> = {
 export const ResearchView: React.FC = () => {
   const [researchAreas, setResearchAreas] = useState<ResearchArea[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
+  const [roadmapItems, setRoadmapItems] = useState<RoadmapItem[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTag, setSelectedTag] = useState<string>('Semua');
   const [loading, setLoading] = useState(true);
+
+  const fetchRoadmap = () => {
+    roadmapService.getAll().then(setRoadmapItems);
+  };
 
   useEffect(() => {
     document.title = 'Fokus & Roadmap Penelitian | Undiksha GenAI';
@@ -51,18 +57,21 @@ export const ResearchView: React.FC = () => {
 
     Promise.all([
       researchService.getAll(),
-      projectService.getAll()
-    ]).then(([areas, projs]) => {
+      projectService.getAll(),
+      roadmapService.getAll()
+    ]).then(([areas, projs, rdm]) => {
       setResearchAreas(areas);
       setProjects(projs);
+      setRoadmapItems(rdm);
       setLoading(false);
     });
 
-    const handleUpdate = () => {
+    const handleStorageUpdate = () => {
+      fetchRoadmap();
       researchService.getAll().then(setResearchAreas);
     };
-    window.addEventListener('rg_storage_updated', handleUpdate);
-    return () => window.removeEventListener('rg_storage_updated', handleUpdate);
+    window.addEventListener('rg_storage_updated', handleStorageUpdate);
+    return () => window.removeEventListener('rg_storage_updated', handleStorageUpdate);
   }, []);
 
   const filteredAreas = researchAreas.filter((area) => {
@@ -85,43 +94,9 @@ export const ResearchView: React.FC = () => {
         subtitle="Mengeksplorasi garis depan perkembangan kecerdasan artifisial melalui 9 bidang kajian strategis yang terintegrasi."
       />
 
-      {/* Roadmap Timeline Section */}
+      {/* Interactive Roadmap Pathway Section */}
       <section className="mb-20">
-        <div className="p-8 rounded-3xl bg-white/90 dark:bg-navy-900/60 border border-blue-100 dark:border-electric-500/30 backdrop-blur-md shadow-xl shadow-blue-500/5">
-          <div className="flex items-center gap-3 mb-8">
-            <div className="p-2.5 rounded-xl bg-blue-50 dark:bg-electric-500/10 text-blue-600 dark:text-electric-400 border border-blue-100 dark:border-electric-500/30">
-              <Cpu className="w-6 h-6" />
-            </div>
-            <div>
-              <h3 className="text-xl font-bold text-slate-900 dark:text-white">Roadmap Riset Strategis 2023 - 2028</h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400">Peta jalan evolusi riset kelompok dari infrastruktur dasar hingga pusat rujukan dunia.</p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {siteConfig.roadmap.map((phase, idx) => (
-              <div
-                key={idx}
-                className="p-5 rounded-2xl bg-blue-50/40 dark:bg-navy-950/80 border border-blue-100 dark:border-navy-800 flex flex-col justify-between shadow-sm"
-              >
-                <div>
-                  <span className="inline-block px-2.5 py-0.5 rounded text-[11px] font-mono font-bold bg-blue-100 text-blue-700 dark:bg-violet-500/10 dark:text-violet-400 border border-blue-200 dark:border-violet-500/30 mb-3">
-                    {phase.phase}
-                  </span>
-                  <h4 className="text-sm font-bold text-slate-900 dark:text-white mb-3">{phase.title}</h4>
-                  <ul className="space-y-2">
-                    {phase.points.map((pt, i) => (
-                      <li key={i} className="flex items-start gap-2 text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-blue-600 dark:text-electric-400 shrink-0 mt-0.5" />
-                        <span>{pt}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+        <InteractiveRoadmap items={roadmapItems} />
       </section>
 
       {/* Search & Filter bar */}
