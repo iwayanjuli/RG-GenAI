@@ -6,47 +6,51 @@ import { motion } from 'framer-motion';
 export const CollaborationCTA: React.FC = () => {
   return (
     <section className="py-20 relative overflow-hidden bg-navy-950">
+      {/* Soft blue radiant ambient glow behind the card */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[850px] h-[500px] bg-blue-500/25 rounded-full blur-[120px] pointer-events-none" />
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className="relative rounded-3xl bg-gradient-to-r from-electric-950/80 via-navy-900 to-violet-950/80 border border-electric-500/30 p-8 sm:p-14 overflow-hidden shadow-2xl">
+        <div className="relative rounded-3xl bg-gradient-to-br from-blue-600 via-blue-500 to-cyan-500 border border-blue-300/40 p-8 sm:p-14 overflow-hidden shadow-2xl shadow-blue-500/30 text-white">
 
-          {/* Subtle decorative glow balls */}
-          <div className="absolute top-0 right-0 w-80 h-80 bg-electric-500/10 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute bottom-0 left-0 w-80 h-80 bg-violet-500/10 rounded-full blur-3xl pointer-events-none" />
+          {/* Luminous light decorative elements */}
+          <div className="absolute top-0 right-0 w-96 h-96 bg-white/20 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute bottom-0 left-0 w-80 h-80 bg-cyan-300/30 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute inset-0 bg-[radial-gradient(#ffffff18_1px,transparent_1px)] [background-size:16px_16px] pointer-events-none" />
 
-          <div className="max-w-3xl">
+          <div className="max-w-3xl relative z-10">
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
-              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 mb-6"
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-white/20 text-white border border-white/35 backdrop-blur-md mb-6 shadow-sm"
             >
-              <Sparkles className="w-3.5 h-3.5" />
+              <Sparkles className="w-3.5 h-3.5 text-cyan-200" />
               <span>Sinergi Riset & Hilirisasi Inovasi</span>
             </motion.div>
 
-            <h2 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight">
+            <h2 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight drop-shadow-sm">
               Tertarik Berkolaborasi dalam Ekosistem Generative AI?
             </h2>
 
-            <p className="mt-4 text-sm sm:text-base text-slate-300 leading-relaxed">
+            <p className="mt-4 text-sm sm:text-base text-blue-50 leading-relaxed font-normal">
               Kami membuka peluang kemitraan komprehensif bagi peneliti sejawat, institusi perguruan tinggi, mahasiswa magister/sarjana, mitra industri teknologi, serta lembaga kebudayaan untuk bersama-sama mendorong kemajuan AI nusantara.
             </p>
 
-            <div className="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs font-medium text-slate-300">
-              <div className="flex items-center gap-2 p-3 rounded-xl bg-navy-900/60 border border-navy-800">
-                <Building className="w-4 h-4 text-electric-400 shrink-0" />
+            <div className="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs font-medium text-white">
+              <div className="flex items-center gap-2.5 p-3 rounded-xl bg-white/15 hover:bg-white/20 border border-white/25 backdrop-blur-sm transition-colors shadow-sm">
+                <Building className="w-4 h-4 text-cyan-100 shrink-0" />
                 <span>Industry Joint Lab</span>
               </div>
-              <div className="flex items-center gap-2 p-3 rounded-xl bg-navy-900/60 border border-navy-800">
-                <Globe2 className="w-4 h-4 text-violet-400 shrink-0" />
+              <div className="flex items-center gap-2.5 p-3 rounded-xl bg-white/15 hover:bg-white/20 border border-white/25 backdrop-blur-sm transition-colors shadow-sm">
+                <Globe2 className="w-4 h-4 text-cyan-100 shrink-0" />
                 <span>Konsorsium Hibah</span>
               </div>
-              <div className="flex items-center gap-2 p-3 rounded-xl bg-navy-900/60 border border-navy-800">
-                <GraduationCap className="w-4 h-4 text-cyan-400 shrink-0" />
+              <div className="flex items-center gap-2.5 p-3 rounded-xl bg-white/15 hover:bg-white/20 border border-white/25 backdrop-blur-sm transition-colors shadow-sm">
+                <GraduationCap className="w-4 h-4 text-cyan-100 shrink-0" />
                 <span>Student Internship</span>
               </div>
-              <div className="flex items-center gap-2 p-3 rounded-xl bg-navy-900/60 border border-navy-800">
-                <Cpu className="w-4 h-4 text-emerald-400 shrink-0" />
+              <div className="flex items-center gap-2.5 p-3 rounded-xl bg-white/15 hover:bg-white/20 border border-white/25 backdrop-blur-sm transition-colors shadow-sm">
+                <Cpu className="w-4 h-4 text-cyan-100 shrink-0" />
                 <span>Dataset & Compute</span>
               </div>
             </div>
@@ -54,15 +58,15 @@ export const CollaborationCTA: React.FC = () => {
             <div className="mt-8 flex flex-wrap items-center gap-4">
               <Link
                 to="/contact"
-                className="px-6 py-3.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-electric-600 via-violet-600 to-electric-600 bg-[length:200%_auto] hover:bg-[position:right_center] transition-all duration-500 shadow-glow-blue flex items-center gap-2"
+                className="px-6 py-3.5 rounded-xl text-sm font-bold text-blue-700 bg-white hover:bg-blue-50 hover:shadow-glow-blue transition-all duration-300 shadow-xl shadow-blue-900/30 flex items-center gap-2 hover:-translate-y-0.5"
               >
                 <span>Ajukan Diskusi Kolaborasi</span>
-                <ArrowRight className="w-4 h-4" />
+                <ArrowRight className="w-4 h-4 text-blue-700" />
               </Link>
 
               <Link
                 to="/about"
-                className="px-6 py-3.5 rounded-xl text-sm font-semibold text-slate-200 bg-navy-900/80 hover:bg-navy-800 border border-navy-700 transition-colors"
+                className="px-6 py-3.5 rounded-xl text-sm font-semibold text-white bg-blue-700/40 hover:bg-blue-700/60 border border-white/30 backdrop-blur-sm transition-all hover:-translate-y-0.5"
               >
                 Profil & Anggota Peneliti
               </Link>
