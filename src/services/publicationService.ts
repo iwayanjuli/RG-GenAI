@@ -2,7 +2,7 @@ import { Publication } from '../types';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { getStoredData, setStoredData, STORAGE_KEYS } from './storage';
 import { initialPublications } from '../data/mockData';
-import { slugify } from '../lib/utils';
+import { slugify, generateUUID } from '../lib/utils';
 
 export const publicationService = {
   async getAll(): Promise<Publication[]> {
@@ -30,7 +30,7 @@ export const publicationService = {
   async create(pub: Omit<Publication, 'id' | 'slug'> & { slug?: string }): Promise<Publication> {
     const newPub: Publication = {
       ...pub,
-      id: 'pub-' + Date.now(),
+      id: generateUUID(),
       slug: pub.slug || slugify(pub.title),
       created_at: new Date().toISOString()
     };

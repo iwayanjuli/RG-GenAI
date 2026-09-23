@@ -2,6 +2,7 @@ import { ContactMessage } from '../types';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { getStoredData, setStoredData, STORAGE_KEYS } from './storage';
 import { initialMessages } from '../data/mockData';
+import { generateUUID } from '../lib/utils';
 
 export const contactService = {
   async getAll(): Promise<ContactMessage[]> {
@@ -19,7 +20,7 @@ export const contactService = {
   async sendMessage(message: Omit<ContactMessage, 'id' | 'status' | 'created_at'>): Promise<ContactMessage> {
     const newMessage: ContactMessage = {
       ...message,
-      id: 'msg-' + Date.now(),
+      id: generateUUID(),
       status: 'Unread',
       created_at: new Date().toISOString()
     };

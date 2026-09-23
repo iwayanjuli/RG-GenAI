@@ -2,6 +2,7 @@ import { Member } from '../types';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { getStoredData, setStoredData, STORAGE_KEYS } from './storage';
 import { initialMembers } from '../data/mockData';
+import { generateUUID } from '../lib/utils';
 
 export const memberService = {
   async getAll(): Promise<Member[]> {
@@ -24,7 +25,7 @@ export const memberService = {
   async create(member: Omit<Member, 'id'>): Promise<Member> {
     const newMember: Member = {
       ...member,
-      id: 'm-' + Date.now(),
+      id: generateUUID(),
       created_at: new Date().toISOString()
     };
 

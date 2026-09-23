@@ -2,6 +2,7 @@ import { Partner } from '../types';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { getStoredData, setStoredData, STORAGE_KEYS } from './storage';
 import { initialPartners } from '../data/mockData';
+import { generateUUID } from '../lib/utils';
 
 export const partnerService = {
   async getAll(): Promise<Partner[]> {
@@ -19,7 +20,7 @@ export const partnerService = {
   async create(partner: Omit<Partner, 'id'>): Promise<Partner> {
     const newPartner: Partner = {
       ...partner,
-      id: 'prt-' + Date.now(),
+      id: generateUUID(),
       created_at: new Date().toISOString()
     };
 

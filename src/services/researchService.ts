@@ -2,7 +2,7 @@ import { ResearchArea } from '../types';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { getStoredData, setStoredData, STORAGE_KEYS } from './storage';
 import { initialResearchAreas } from '../data/mockData';
-import { slugify } from '../lib/utils';
+import { slugify, generateUUID } from '../lib/utils';
 
 export const researchService = {
   async getAll(): Promise<ResearchArea[]> {
@@ -25,7 +25,7 @@ export const researchService = {
   async create(area: Omit<ResearchArea, 'id' | 'slug'> & { slug?: string }): Promise<ResearchArea> {
     const newArea: ResearchArea = {
       ...area,
-      id: 'ra-' + Date.now(),
+      id: generateUUID(),
       slug: area.slug || slugify(area.title),
       created_at: new Date().toISOString()
     };

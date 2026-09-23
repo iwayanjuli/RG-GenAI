@@ -2,7 +2,7 @@ import { Project } from '../types';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { getStoredData, setStoredData, STORAGE_KEYS } from './storage';
 import { initialProjects } from '../data/mockData';
-import { slugify } from '../lib/utils';
+import { slugify, generateUUID } from '../lib/utils';
 
 export const projectService = {
   async getAll(): Promise<Project[]> {
@@ -30,7 +30,7 @@ export const projectService = {
   async create(project: Omit<Project, 'id' | 'slug'> & { slug?: string }): Promise<Project> {
     const newProject: Project = {
       ...project,
-      id: 'p-' + Date.now(),
+      id: generateUUID(),
       slug: project.slug || slugify(project.title),
       created_at: new Date().toISOString()
     };
