@@ -4,15 +4,19 @@ import { getStoredData, setStoredData, STORAGE_KEYS } from './storage';
 import { initialProjects } from '../data/mockData';
 import { slugify, generateUUID } from '../lib/utils';
 
+const mapRow = ({ research_area, leader, project_gallery, project_members, ...row }: any): Project => ({ ...row, research_area_title: research_area?.title, project_leader_name: leader ? [leader.name, leader.academic_title].filter(Boolean).join(', ') : undefined, gallery: (project_gallery || []).sort((a: any,b: any) => a.display_order-b.display_order), team_members: (project_members || []).filter((entry: any) => entry.member).map((entry: any) => ({ ...entry.member, role: entry.role })) });
+
+const selection = '*, research_area:research_areas(title), leader:members!projects_project_leader_id_fkey(name,academic_title), project_gallery(*), project_members(role, member:members(id,name,photo_url))';
+
 export const projectService = {
   async getAll(): Promise<Project[]> {
     if (isSupabaseConfigured && supabase) {
       const { data, error } = await supabase
         .from('projects')
-        .select('*')
+        .select(selection)
         .order('start_year', { ascending: false });
       if (error) throw error;
-      return data as Project[];
+      return (data || []).map(mapRow);
     }
     return getStoredData<Project[]>(STORAGE_KEYS.PROJECTS, initialProjects);
   },
@@ -36,13 +40,11 @@ export const projectService = {
     };
 
     if (isSupabaseConfigured && supabase) {
-      const { data, error } = await supabase
-        .from('projects')
-        .insert([newProject])
-        .select()
-        .single();
+      const { error } = await supabase.rpc('save_projects', { payload: newProject });
       if (error) throw error;
-      return data as Project;
+      const { data, error: readError } = await supabase.from('projects').select(selection).eq('id', newProject.id).single();
+      if (readError) throw readError;
+      return mapRow(data);
     }
 
     const current = getStoredData<Project[]>(STORAGE_KEYS.PROJECTS, initialProjects);
@@ -53,14 +55,11 @@ export const projectService = {
 
   async update(id: string, updates: Partial<Project>): Promise<Project> {
     if (isSupabaseConfigured && supabase) {
-      const { data, error } = await supabase
-        .from('projects')
-        .update(updates)
-        .eq('id', id)
-        .select()
-        .single();
+      const { error } = await supabase.rpc('save_projects', { payload: { ...updates, id } });
       if (error) throw error;
-      return data as Project;
+      const { data, error: readError } = await supabase.from('projects').select(selection).eq('id', id).single();
+      if (readError) throw readError;
+      return mapRow(data);
     }
 
     const current = getStoredData<Project[]>(STORAGE_KEYS.PROJECTS, initialProjects);

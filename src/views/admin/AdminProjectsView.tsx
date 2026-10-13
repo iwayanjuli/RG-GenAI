@@ -140,7 +140,7 @@ export const AdminProjectsView: React.FC = () => {
       description: formData.description,
       cover_image: formData.cover_image,
       start_year: Number(formData.start_year) || 2025,
-      end_year: formData.end_year ? Number(formData.end_year) : undefined,
+      end_year: formData.end_year ? Number(formData.end_year) : null,
       status: formData.status,
       research_area_id: formData.research_area_id,
       research_area_title: matchedArea?.title,

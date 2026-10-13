@@ -7,17 +7,9 @@ import { generateUUID } from '../lib/utils';
 export const roadmapService = {
   async getAll(): Promise<RoadmapItem[]> {
     if (isSupabaseConfigured && supabase) {
-      try {
-        const { data, error } = await supabase
-          .from('roadmap_phases')
-          .select('*')
-          .order('display_order', { ascending: true });
-        if (!error && data && data.length > 0) {
-          return data as RoadmapItem[];
-        }
-      } catch (err) {
-        console.warn('Supabase roadmap_phases table not ready, falling back to local storage:', err);
-      }
+      const { data, error } = await supabase.from('roadmap_phases').select('*').order('display_order', { ascending: true });
+      if (error) throw error;
+      return data as RoadmapItem[];
     }
     const stored = getStoredData<RoadmapItem[]>(STORAGE_KEYS.ROADMAP, initialRoadmap);
     return [...stored].sort((a, b) => a.display_order - b.display_order);
@@ -37,18 +29,13 @@ export const roadmapService = {
     };
 
     if (isSupabaseConfigured && supabase) {
-      try {
-        const { data, error } = await supabase
+      const { data, error } = await supabase
           .from('roadmap_phases')
           .insert([newItem])
           .select()
           .single();
-        if (!error && data) {
-          return data as RoadmapItem;
-        }
-      } catch (err) {
-        console.warn('Failed creating in Supabase, saving locally:', err);
-      }
+      if (error) throw error;
+      return data as RoadmapItem;
     }
 
     const current = getStoredData<RoadmapItem[]>(STORAGE_KEYS.ROADMAP, initialRoadmap);
@@ -61,19 +48,14 @@ export const roadmapService = {
     const timestamp = new Date().toISOString();
 
     if (isSupabaseConfigured && supabase) {
-      try {
-        const { data, error } = await supabase
+      const { data, error } = await supabase
           .from('roadmap_phases')
           .update({ ...updates, updated_at: timestamp })
           .eq('id', id)
           .select()
           .single();
-        if (!error && data) {
-          return data as RoadmapItem;
-        }
-      } catch (err) {
-        console.warn('Failed updating in Supabase, updating locally:', err);
-      }
+      if (error) throw error;
+      return data as RoadmapItem;
     }
 
     const current = getStoredData<RoadmapItem[]>(STORAGE_KEYS.ROADMAP, initialRoadmap);
@@ -89,14 +71,9 @@ export const roadmapService = {
 
   async delete(id: string): Promise<void> {
     if (isSupabaseConfigured && supabase) {
-      try {
-        await supabase
-          .from('roadmap_phases')
-          .delete()
-          .eq('id', id);
-      } catch (err) {
-        console.warn('Failed deleting in Supabase, deleting locally:', err);
-      }
+      const { error } = await supabase.from('roadmap_phases').delete().eq('id', id);
+      if (error) throw error;
+      return;
     }
 
     const current = getStoredData<RoadmapItem[]>(STORAGE_KEYS.ROADMAP, initialRoadmap);

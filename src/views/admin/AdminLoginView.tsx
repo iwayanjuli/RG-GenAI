@@ -71,6 +71,7 @@ export const AdminLoginView: React.FC = () => {
           </p>
         </div>
 
+        {!isSupabaseConfigured && <>
         {/* Demo Fast Logins */}
         <div className="mb-6 p-4 rounded-2xl bg-navy-950/80 border border-navy-800 space-y-3">
           <div className="flex items-center gap-1.5 text-xs font-semibold text-electric-400">
@@ -112,6 +113,7 @@ export const AdminLoginView: React.FC = () => {
           <div className="border-t border-navy-800 w-full" />
         </div>
 
+        </>}
         {/* Supabase login form */}
         <form onSubmit={handleSupabaseSubmit} className="space-y-4">
           <div>
@@ -168,7 +170,7 @@ export const AdminLoginView: React.FC = () => {
           <span>
             Status Supabase:{' '}
             <strong className={isSupabaseConfigured ? 'text-emerald-400' : 'text-amber-400'}>
-              {isSupabaseConfigured ? 'Terhubung (Live Backend)' : 'Mode Mock Storage Aktif (Lokal)'}
+              {isSupabaseConfigured ? 'Konfigurasi Supabase tersedia' : 'Mode Mock Storage Aktif (Lokal)'}
             </strong>
           </span>
         </div>

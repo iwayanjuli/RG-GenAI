@@ -1,3 +1,4 @@
+import { isSupabaseConfigured } from '../lib/supabase';
 import { 
   Member, 
   ResearchArea, 
@@ -28,7 +29,7 @@ const STORAGE_KEYS = {
 
 // Initialize default storage with initial realistic data if not present
 export function initLocalStorage(): void {
-  if (typeof window === 'undefined') return;
+  if (typeof window === 'undefined' || isSupabaseConfigured) return;
   if (!localStorage.getItem(STORAGE_KEYS.MEMBERS)) {
     localStorage.setItem(STORAGE_KEYS.MEMBERS, JSON.stringify(initialMembers));
   }

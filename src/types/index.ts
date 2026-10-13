@@ -60,7 +60,7 @@ export interface Project {
   description: string;
   cover_image: string;
   start_year: number;
-  end_year?: number;
+  end_year?: number | null;
   status: ProjectStatus;
   research_area_id?: string;
   research_area_title?: string;

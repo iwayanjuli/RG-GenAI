@@ -199,3 +199,8 @@ Pada halaman login, Anda dapat mengklik tombol **Login Demo Instan**:
 - **Alamat**: Gedung Lab FTK, Kampus Tengah Undiksha, Jl. Udayana No. 11, Singaraja, Bali 81116
 - **Email**: `genai@undiksha.ac.id`
 - **Telepon**: `+62 (0362) 22570`
+
+
+## Integrasi Supabase lengkap
+
+Lihat [supabase/README.md](supabase/README.md) untuk pemasangan seluruh data panel admin, akun Supabase Auth, dan aturan akses. SQL gabungan tersedia pada [supabase/setup.sql](supabase/setup.sql). Login demo hanya tersedia saat Supabase tidak terkonfigurasi.

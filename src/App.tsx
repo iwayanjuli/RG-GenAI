@@ -10,6 +10,8 @@ import { Navbar } from './components/layout/Navbar';
 import { Footer } from './components/layout/Footer';
 import { BackToTop } from './components/common/BackToTop';
 
+import { SearchView } from './views/SearchView';
+
 // Public Views
 import { HomeView } from './views/HomeView';
 import { AboutView } from './views/AboutView';
@@ -63,6 +65,7 @@ export const App: React.FC = () => {
               {/* Public Routes */}
               <Route element={<PublicLayout />}>
                 <Route path="/" element={<HomeView />} />
+                <Route path="/search" element={<SearchView />} />
                 <Route path="/about" element={<AboutView />} />
                 <Route path="/research" element={<ResearchView />} />
                 <Route path="/projects" element={<ProjectsView />} />

@@ -1,3 +1,4 @@
+import { useSearchParams } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
 import { SectionTitle } from '../components/common/SectionTitle';
 import { Breadcrumbs } from '../components/common/Breadcrumbs';
@@ -29,6 +30,7 @@ const CATEGORIES: ('Semua' | MemberCategory)[] = [
 ];
 
 export const AboutView: React.FC = () => {
+  const [searchParams] = useSearchParams();
   const [members, setMembers] = useState<Member[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('Semua');
   const [selectedMember, setSelectedMember] = useState<Member | null>(null);
@@ -49,6 +51,11 @@ export const AboutView: React.FC = () => {
     window.addEventListener('rg_storage_updated', handleUpdate);
     return () => window.removeEventListener('rg_storage_updated', handleUpdate);
   }, []);
+
+  useEffect(() => {
+    const memberId = searchParams.get('member');
+    setSelectedMember(memberId ? members.find(member => member.id === memberId && member.is_active) || null : null);
+  }, [searchParams, members]);
 
   const filteredMembers = selectedCategory === 'Semua'
     ? members

@@ -49,51 +49,55 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    // Check saved local session
-    const savedUser = localStorage.getItem('rg_genai_admin_user');
-    if (savedUser) {
-      try {
-        setUser(JSON.parse(savedUser));
-      } catch {
-        localStorage.removeItem('rg_genai_admin_user');
-      }
+    let active = true;
+    let revision = 0;
+    if (!supabase) {
+      try { const saved = localStorage.getItem('rg_genai_admin_user'); if (saved) setUser(JSON.parse(saved)); }
+      catch { localStorage.removeItem('rg_genai_admin_user'); }
+      setIsLoading(false);
+      return;
     }
-    setIsLoading(false);
+    localStorage.removeItem('rg_genai_admin_user');
+    const client = supabase;
+    const restore = async (authUser: { id: string } | null) => {
+      const current = ++revision;
+      let profile: User | null = null;
+      if (authUser) {
+        const { data, error } = await client.from('users').select('*').eq('id', authUser.id).maybeSingle();
+        if (!error && data && ['Super Admin', 'Admin', 'Editor'].includes(data.role)) profile = data as User;
+      }
+      if (active && current === revision) { setUser(profile); setIsLoading(false); }
+    };
+    const { data: { subscription } } = client.auth.onAuthStateChange((_event, session) => {
+      // Defer database calls until the Auth callback releases its lock.
+      setTimeout(() => { if (active) void restore(session?.user || null); }, 0);
+    });
+    client.auth.getSession().then(({ data, error }) => {
+      if (active && revision === 0) void restore(error ? null : data.session?.user || null);
+    }).catch(() => { if (active) setIsLoading(false); });
+    return () => { active = false; subscription.unsubscribe(); };
   }, []);
 
   const loginAsDemo = (role: UserRole) => {
+    if (isSupabaseConfigured) return;
     const demoUser = DEMO_USERS[role];
     setUser(demoUser);
     localStorage.setItem('rg_genai_admin_user', JSON.stringify(demoUser));
   };
 
   const loginWithSupabase = async (email: string, pass: string): Promise<{ error?: string }> => {
-    if (!isSupabaseConfigured || !supabase) {
-      return { error: 'Supabase credentials are not configured. Use Demo Login options.' };
-    }
-    setIsLoading(true);
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password: pass,
-    });
-    setIsLoading(false);
-
-    if (error) {
-      return { error: error.message };
-    }
-
-    if (data.user) {
-      const loggedUser: User = {
-        id: data.user.id,
-        full_name: data.user.user_metadata?.full_name || email.split('@')[0],
-        email: data.user.email || email,
-        role: (data.user.user_metadata?.role as UserRole) || 'Admin',
-        created_at: data.user.created_at,
-      };
-      setUser(loggedUser);
-      localStorage.setItem('rg_genai_admin_user', JSON.stringify(loggedUser));
-    }
-    return {};
+    if (!supabase) return { error: 'Konfigurasi Supabase belum tersedia.' };
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password: pass });
+      if (error) return { error: error.message };
+      const { data: profile, error: profileError } = await supabase.from('users').select('*').eq('id', data.user.id).maybeSingle();
+      if (profileError || !profile || !['Super Admin', 'Admin', 'Editor'].includes(profile.role)) {
+        await supabase.auth.signOut();
+        return { error: 'Akun belum memiliki profil administrator. Hubungi Super Admin.' };
+      }
+      setUser(profile as User);
+      return {};
+    } catch { return { error: 'Tidak dapat menghubungi Supabase. Coba kembali.' }; }
   };
 
   const logout = async () => {

@@ -25,7 +25,7 @@ import {
   ArrowRight,
   CheckCircle2
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 
 const ICON_MAP: Record<string, React.ElementType> = {
   Brain,
@@ -43,7 +43,9 @@ export const ResearchView: React.FC = () => {
   const [researchAreas, setResearchAreas] = useState<ResearchArea[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [roadmapItems, setRoadmapItems] = useState<RoadmapItem[]>([]);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchParams] = useSearchParams();
+  const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
+  useEffect(() => { setSearchQuery(searchParams.get('q') || ''); }, [searchParams]);
   const [selectedTag, setSelectedTag] = useState<string>('Semua');
   const [loading, setLoading] = useState(true);
 

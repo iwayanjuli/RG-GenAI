@@ -26,13 +26,9 @@ export const contactService = {
     };
 
     if (isSupabaseConfigured && supabase) {
-      const { data, error } = await supabase
-        .from('contact_messages')
-        .insert([newMessage])
-        .select()
-        .single();
+      const { error } = await supabase.from('contact_messages').insert([newMessage]);
       if (error) throw error;
-      return data as ContactMessage;
+      return newMessage;
     }
 
     const current = getStoredData<ContactMessage[]>(STORAGE_KEYS.MESSAGES, initialMessages);

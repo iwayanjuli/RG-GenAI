@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Sparkles, Menu, X, ArrowRight, Shield } from 'lucide-react';
+import { Sparkles, Menu, X, ArrowRight, Shield, Search } from 'lucide-react';
 import { siteConfig } from '../../data/siteConfig';
 import { ThemeToggle } from './ThemeToggle';
 import { useAuth } from '../../context/AuthContext';
@@ -36,17 +36,17 @@ export const Navbar: React.FC = () => {
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
           {/* Logo and Brand */}
-          <Link to="/" className="flex items-center gap-3 group focus:outline-none">
-            <div className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-electric-600 via-blue-600 to-cyan-500 shadow-md shadow-blue-500/20 p-0.5 group-hover:scale-105 transition-transform duration-300">
+          <Link to="/" className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1 lg:flex-none group focus:outline-none">
+            <div className="relative flex items-center justify-center shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-electric-600 via-blue-600 to-cyan-500 shadow-md shadow-blue-500/20 p-0.5 group-hover:scale-105 transition-transform duration-300">
               <div className="w-full h-full bg-white dark:bg-navy-950 rounded-[10px] flex items-center justify-center">
                 <Sparkles className="w-5 h-5 text-blue-600 dark:text-cyan-400 group-hover:rotate-12 transition-transform duration-300" />
               </div>
             </div>
-            <div className="flex flex-col">
-              <span className="text-base font-bold tracking-tight text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-electric-400 transition-colors">
+            <div className="flex flex-col min-w-0">
+              <span className="truncate text-sm sm:text-base font-bold tracking-tight text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-electric-400 transition-colors">
                 Generative AI <span className="text-blue-600 dark:text-electric-400 font-bold">RG</span>
               </span>
-              <span className="text-[11px] font-medium tracking-wide text-slate-500 dark:text-slate-400 -mt-1">
+              <span className="truncate text-[11px] font-medium tracking-wide text-slate-500 dark:text-slate-400 -mt-1">
                 Universitas Pendidikan Ganesha
               </span>
             </div>
@@ -60,7 +60,7 @@ export const Navbar: React.FC = () => {
                 <Link
                   key={item.path}
                   to={item.path}
-                  className={`relative px-4 py-1.5 rounded-full text-sm font-medium transition-colors duration-200 ${
+                  className={`relative px-3 xl:px-4 py-1.5 rounded-full text-xs xl:text-sm font-medium transition-colors duration-200 ${
                     isActive
                       ? 'text-white'
                       : 'text-slate-600 hover:text-blue-600 dark:text-slate-400 dark:hover:text-slate-200'
@@ -79,8 +79,10 @@ export const Navbar: React.FC = () => {
             })}
           </nav>
 
+          <Link to="/search" aria-label="Cari informasi" title="Cari informasi" className="shrink-0 ml-2 mr-2 p-2 rounded-xl border border-blue-100 dark:border-navy-700 bg-white dark:bg-navy-900 text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-electric-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-500"><Search className="w-5 h-5" /></Link>
+
           {/* Right Action Buttons */}
-          <div className="hidden sm:flex items-center gap-3">
+          <div className="hidden lg:flex items-center gap-3">
             <ThemeToggle />
 
             {isAuthenticated ? (
@@ -96,7 +98,7 @@ export const Navbar: React.FC = () => {
 
             <Link
               to="/contact"
-              className="relative group inline-flex items-center gap-2 px-4 py-2 text-xs md:text-sm font-semibold text-white rounded-xl bg-gradient-to-r from-blue-600 via-electric-600 to-blue-700 bg-[length:200%_auto] hover:bg-[position:right_center] transition-all duration-500 shadow-md shadow-blue-500/20 hover:shadow-blue-500/35"
+              className="relative group hidden xl:inline-flex items-center gap-2 px-4 py-2 text-xs md:text-sm font-semibold text-white rounded-xl bg-gradient-to-r from-blue-600 via-electric-600 to-blue-700 bg-[length:200%_auto] hover:bg-[position:right_center] transition-all duration-500 shadow-md shadow-blue-500/20 hover:shadow-blue-500/35"
             >
               <span>Join Collaboration</span>
               <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
@@ -104,7 +106,7 @@ export const Navbar: React.FC = () => {
           </div>
 
           {/* Mobile Hamburger Button */}
-          <div className="flex items-center gap-2 lg:hidden">
+          <div className="flex shrink-0 items-center gap-2 lg:hidden">
             <ThemeToggle />
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}

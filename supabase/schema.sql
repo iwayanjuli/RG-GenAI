@@ -1,3 +1,4 @@
+BEGIN;
 -- ==============================================================================
 -- DATABASE SCHEMA: Generative AI Research Group - Universitas Pendidikan Ganesha
 -- ==============================================================================
@@ -167,42 +168,6 @@ CREATE INDEX IF NOT EXISTS idx_publications_year ON publications(publication_yea
 CREATE INDEX IF NOT EXISTS idx_publications_type ON publications(publication_type);
 CREATE INDEX IF NOT EXISTS idx_messages_status ON contact_messages(status);
 
--- ROW LEVEL SECURITY (RLS) POLICIES
-ALTER TABLE users ENABLE ROW LEVEL SECURITY;
-ALTER TABLE research_areas ENABLE ROW LEVEL SECURITY;
-ALTER TABLE members ENABLE ROW LEVEL SECURITY;
-ALTER TABLE projects ENABLE ROW LEVEL SECURITY;
-ALTER TABLE project_members ENABLE ROW LEVEL SECURITY;
-ALTER TABLE project_gallery ENABLE ROW LEVEL SECURITY;
-ALTER TABLE publications ENABLE ROW LEVEL SECURITY;
-ALTER TABLE publication_authors ENABLE ROW LEVEL SECURITY;
-ALTER TABLE partners ENABLE ROW LEVEL SECURITY;
-ALTER TABLE contact_messages ENABLE ROW LEVEL SECURITY;
-
--- Public read access policies for public catalog
-CREATE POLICY "Allow public read access on research_areas" ON research_areas FOR SELECT USING (true);
-CREATE POLICY "Allow public read access on members" ON members FOR SELECT USING (is_active = true);
-CREATE POLICY "Allow public read access on projects" ON projects FOR SELECT USING (true);
-CREATE POLICY "Allow public read access on project_members" ON project_members FOR SELECT USING (true);
-CREATE POLICY "Allow public read access on project_gallery" ON project_gallery FOR SELECT USING (true);
-CREATE POLICY "Allow public read access on publications" ON publications FOR SELECT USING (true);
-CREATE POLICY "Allow public read access on publication_authors" ON publication_authors FOR SELECT USING (true);
-CREATE POLICY "Allow public read access on partners" ON partners FOR SELECT USING (is_active = true);
-
--- Public insert policy on contact_messages
-CREATE POLICY "Allow public to submit contact messages" ON contact_messages FOR INSERT WITH CHECK (true);
-
--- Authenticated full access for admin users
-CREATE POLICY "Allow authenticated read/write on users" ON users FOR ALL USING (auth.role() = 'authenticated');
-CREATE POLICY "Allow authenticated full on research_areas" ON research_areas FOR ALL USING (auth.role() = 'authenticated');
-CREATE POLICY "Allow authenticated full on members" ON members FOR ALL USING (auth.role() = 'authenticated');
-CREATE POLICY "Allow authenticated full on projects" ON projects FOR ALL USING (auth.role() = 'authenticated');
-CREATE POLICY "Allow authenticated full on project_members" ON project_members FOR ALL USING (auth.role() = 'authenticated');
-CREATE POLICY "Allow authenticated full on project_gallery" ON project_gallery FOR ALL USING (auth.role() = 'authenticated');
-CREATE POLICY "Allow authenticated full on publications" ON publications FOR ALL USING (auth.role() = 'authenticated');
-CREATE POLICY "Allow authenticated full on publication_authors" ON publication_authors FOR ALL USING (auth.role() = 'authenticated');
-CREATE POLICY "Allow authenticated full on partners" ON partners FOR ALL USING (auth.role() = 'authenticated');
-CREATE POLICY "Allow authenticated full on contact_messages" ON contact_messages FOR ALL USING (auth.role() = 'authenticated');
 
 -- 11. ROADMAP PHASES
 CREATE TABLE IF NOT EXISTS roadmap_phases (
@@ -223,6 +188,222 @@ CREATE TABLE IF NOT EXISTS roadmap_phases (
 CREATE INDEX IF NOT EXISTS idx_roadmap_status ON roadmap_phases(status);
 CREATE INDEX IF NOT EXISTS idx_roadmap_display_order ON roadmap_phases(display_order);
 
-ALTER TABLE roadmap_phases ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Allow public read access on roadmap_phases" ON roadmap_phases FOR SELECT USING (true);
-CREATE POLICY "Allow authenticated full on roadmap_phases" ON roadmap_phases FOR ALL USING (auth.role() = 'authenticated');
+
+
+
+-- Roles are maintained by trusted database operators, never user metadata.
+CREATE OR REPLACE FUNCTION public.current_admin_role() RETURNS text
+LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public
+AS $$ SELECT role::text FROM public.users WHERE id = auth.uid() $$;
+REVOKE ALL ON FUNCTION public.current_admin_role() FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.current_admin_role() TO anon, authenticated;
+
+ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
+DO $$ DECLARE p record; BEGIN
+  FOR p IN SELECT policyname FROM pg_policies WHERE schemaname='public' AND tablename='users' LOOP
+    EXECUTE format('DROP POLICY %I ON public.users', p.policyname);
+  END LOOP;
+END $$;
+REVOKE ALL ON public.users FROM anon, authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.users TO authenticated;
+CREATE POLICY profile_read ON public.users FOR SELECT TO authenticated USING (id=auth.uid() OR public.current_admin_role()='Super Admin');
+CREATE POLICY profile_insert ON public.users FOR INSERT TO authenticated WITH CHECK (public.current_admin_role()='Super Admin');
+CREATE POLICY profile_update ON public.users FOR UPDATE TO authenticated USING (public.current_admin_role()='Super Admin') WITH CHECK (public.current_admin_role()='Super Admin');
+CREATE POLICY profile_delete ON public.users FOR DELETE TO authenticated USING (public.current_admin_role()='Super Admin');
+
+ALTER TABLE public.research_areas ENABLE ROW LEVEL SECURITY;
+DO $$ DECLARE p record; BEGIN
+  FOR p IN SELECT policyname FROM pg_policies WHERE schemaname='public' AND tablename='research_areas' LOOP
+    EXECUTE format('DROP POLICY %I ON public.research_areas', p.policyname);
+  END LOOP;
+END $$;
+REVOKE ALL ON public.research_areas FROM anon, authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.research_areas TO authenticated;
+GRANT SELECT ON public.research_areas TO anon;
+CREATE POLICY catalog_read ON public.research_areas FOR SELECT TO anon, authenticated USING (true);
+CREATE POLICY content_insert ON public.research_areas FOR INSERT TO authenticated WITH CHECK (public.current_admin_role() IN ('Super Admin','Admin','Editor'));
+CREATE POLICY content_update ON public.research_areas FOR UPDATE TO authenticated USING (public.current_admin_role() IN ('Super Admin','Admin','Editor')) WITH CHECK (public.current_admin_role() IN ('Super Admin','Admin','Editor'));
+CREATE POLICY content_delete ON public.research_areas FOR DELETE TO authenticated USING (public.current_admin_role() IN ('Super Admin','Admin'));
+
+ALTER TABLE public.members ENABLE ROW LEVEL SECURITY;
+DO $$ DECLARE p record; BEGIN
+  FOR p IN SELECT policyname FROM pg_policies WHERE schemaname='public' AND tablename='members' LOOP
+    EXECUTE format('DROP POLICY %I ON public.members', p.policyname);
+  END LOOP;
+END $$;
+REVOKE ALL ON public.members FROM anon, authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.members TO authenticated;
+GRANT SELECT ON public.members TO anon;
+CREATE POLICY catalog_read ON public.members FOR SELECT TO anon, authenticated USING (is_active OR public.current_admin_role() IN ('Super Admin','Admin','Editor'));
+CREATE POLICY content_insert ON public.members FOR INSERT TO authenticated WITH CHECK (public.current_admin_role() IN ('Super Admin','Admin','Editor'));
+CREATE POLICY content_update ON public.members FOR UPDATE TO authenticated USING (public.current_admin_role() IN ('Super Admin','Admin','Editor')) WITH CHECK (public.current_admin_role() IN ('Super Admin','Admin','Editor'));
+CREATE POLICY content_delete ON public.members FOR DELETE TO authenticated USING (public.current_admin_role() IN ('Super Admin','Admin'));
+
+ALTER TABLE public.projects ENABLE ROW LEVEL SECURITY;
+DO $$ DECLARE p record; BEGIN
+  FOR p IN SELECT policyname FROM pg_policies WHERE schemaname='public' AND tablename='projects' LOOP
+    EXECUTE format('DROP POLICY %I ON public.projects', p.policyname);
+  END LOOP;
+END $$;
+REVOKE ALL ON public.projects FROM anon, authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.projects TO authenticated;
+GRANT SELECT ON public.projects TO anon;
+CREATE POLICY catalog_read ON public.projects FOR SELECT TO anon, authenticated USING (true);
+CREATE POLICY content_insert ON public.projects FOR INSERT TO authenticated WITH CHECK (public.current_admin_role() IN ('Super Admin','Admin','Editor'));
+CREATE POLICY content_update ON public.projects FOR UPDATE TO authenticated USING (public.current_admin_role() IN ('Super Admin','Admin','Editor')) WITH CHECK (public.current_admin_role() IN ('Super Admin','Admin','Editor'));
+CREATE POLICY content_delete ON public.projects FOR DELETE TO authenticated USING (public.current_admin_role() IN ('Super Admin','Admin'));
+
+ALTER TABLE public.project_members ENABLE ROW LEVEL SECURITY;
+DO $$ DECLARE p record; BEGIN
+  FOR p IN SELECT policyname FROM pg_policies WHERE schemaname='public' AND tablename='project_members' LOOP
+    EXECUTE format('DROP POLICY %I ON public.project_members', p.policyname);
+  END LOOP;
+END $$;
+REVOKE ALL ON public.project_members FROM anon, authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.project_members TO authenticated;
+GRANT SELECT ON public.project_members TO anon;
+CREATE POLICY catalog_read ON public.project_members FOR SELECT TO anon, authenticated USING (true);
+CREATE POLICY content_insert ON public.project_members FOR INSERT TO authenticated WITH CHECK (public.current_admin_role() IN ('Super Admin','Admin','Editor'));
+CREATE POLICY content_update ON public.project_members FOR UPDATE TO authenticated USING (public.current_admin_role() IN ('Super Admin','Admin','Editor')) WITH CHECK (public.current_admin_role() IN ('Super Admin','Admin','Editor'));
+CREATE POLICY content_delete ON public.project_members FOR DELETE TO authenticated USING (public.current_admin_role() IN ('Super Admin','Admin','Editor'));
+
+ALTER TABLE public.project_gallery ENABLE ROW LEVEL SECURITY;
+DO $$ DECLARE p record; BEGIN
+  FOR p IN SELECT policyname FROM pg_policies WHERE schemaname='public' AND tablename='project_gallery' LOOP
+    EXECUTE format('DROP POLICY %I ON public.project_gallery', p.policyname);
+  END LOOP;
+END $$;
+REVOKE ALL ON public.project_gallery FROM anon, authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.project_gallery TO authenticated;
+GRANT SELECT ON public.project_gallery TO anon;
+CREATE POLICY catalog_read ON public.project_gallery FOR SELECT TO anon, authenticated USING (true);
+CREATE POLICY content_insert ON public.project_gallery FOR INSERT TO authenticated WITH CHECK (public.current_admin_role() IN ('Super Admin','Admin','Editor'));
+CREATE POLICY content_update ON public.project_gallery FOR UPDATE TO authenticated USING (public.current_admin_role() IN ('Super Admin','Admin','Editor')) WITH CHECK (public.current_admin_role() IN ('Super Admin','Admin','Editor'));
+CREATE POLICY content_delete ON public.project_gallery FOR DELETE TO authenticated USING (public.current_admin_role() IN ('Super Admin','Admin','Editor'));
+
+ALTER TABLE public.publications ENABLE ROW LEVEL SECURITY;
+DO $$ DECLARE p record; BEGIN
+  FOR p IN SELECT policyname FROM pg_policies WHERE schemaname='public' AND tablename='publications' LOOP
+    EXECUTE format('DROP POLICY %I ON public.publications', p.policyname);
+  END LOOP;
+END $$;
+REVOKE ALL ON public.publications FROM anon, authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.publications TO authenticated;
+GRANT SELECT ON public.publications TO anon;
+CREATE POLICY catalog_read ON public.publications FOR SELECT TO anon, authenticated USING (true);
+CREATE POLICY content_insert ON public.publications FOR INSERT TO authenticated WITH CHECK (public.current_admin_role() IN ('Super Admin','Admin','Editor'));
+CREATE POLICY content_update ON public.publications FOR UPDATE TO authenticated USING (public.current_admin_role() IN ('Super Admin','Admin','Editor')) WITH CHECK (public.current_admin_role() IN ('Super Admin','Admin','Editor'));
+CREATE POLICY content_delete ON public.publications FOR DELETE TO authenticated USING (public.current_admin_role() IN ('Super Admin','Admin'));
+
+ALTER TABLE public.publication_authors ENABLE ROW LEVEL SECURITY;
+DO $$ DECLARE p record; BEGIN
+  FOR p IN SELECT policyname FROM pg_policies WHERE schemaname='public' AND tablename='publication_authors' LOOP
+    EXECUTE format('DROP POLICY %I ON public.publication_authors', p.policyname);
+  END LOOP;
+END $$;
+REVOKE ALL ON public.publication_authors FROM anon, authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.publication_authors TO authenticated;
+GRANT SELECT ON public.publication_authors TO anon;
+CREATE POLICY catalog_read ON public.publication_authors FOR SELECT TO anon, authenticated USING (true);
+CREATE POLICY content_insert ON public.publication_authors FOR INSERT TO authenticated WITH CHECK (public.current_admin_role() IN ('Super Admin','Admin','Editor'));
+CREATE POLICY content_update ON public.publication_authors FOR UPDATE TO authenticated USING (public.current_admin_role() IN ('Super Admin','Admin','Editor')) WITH CHECK (public.current_admin_role() IN ('Super Admin','Admin','Editor'));
+CREATE POLICY content_delete ON public.publication_authors FOR DELETE TO authenticated USING (public.current_admin_role() IN ('Super Admin','Admin','Editor'));
+
+ALTER TABLE public.partners ENABLE ROW LEVEL SECURITY;
+DO $$ DECLARE p record; BEGIN
+  FOR p IN SELECT policyname FROM pg_policies WHERE schemaname='public' AND tablename='partners' LOOP
+    EXECUTE format('DROP POLICY %I ON public.partners', p.policyname);
+  END LOOP;
+END $$;
+REVOKE ALL ON public.partners FROM anon, authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.partners TO authenticated;
+GRANT SELECT ON public.partners TO anon;
+CREATE POLICY catalog_read ON public.partners FOR SELECT TO anon, authenticated USING (is_active OR public.current_admin_role() IN ('Super Admin','Admin','Editor'));
+CREATE POLICY content_insert ON public.partners FOR INSERT TO authenticated WITH CHECK (public.current_admin_role() IN ('Super Admin','Admin','Editor'));
+CREATE POLICY content_update ON public.partners FOR UPDATE TO authenticated USING (public.current_admin_role() IN ('Super Admin','Admin','Editor')) WITH CHECK (public.current_admin_role() IN ('Super Admin','Admin','Editor'));
+CREATE POLICY content_delete ON public.partners FOR DELETE TO authenticated USING (public.current_admin_role() IN ('Super Admin','Admin'));
+
+ALTER TABLE public.contact_messages ENABLE ROW LEVEL SECURITY;
+DO $$ DECLARE p record; BEGIN
+  FOR p IN SELECT policyname FROM pg_policies WHERE schemaname='public' AND tablename='contact_messages' LOOP
+    EXECUTE format('DROP POLICY %I ON public.contact_messages', p.policyname);
+  END LOOP;
+END $$;
+REVOKE ALL ON public.contact_messages FROM anon, authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.contact_messages TO authenticated;
+GRANT INSERT ON public.contact_messages TO anon;
+CREATE POLICY messages_read ON public.contact_messages FOR SELECT TO authenticated USING (public.current_admin_role() IN ('Super Admin','Admin','Editor'));
+CREATE POLICY messages_submit ON public.contact_messages FOR INSERT TO anon, authenticated WITH CHECK (status='Unread');
+CREATE POLICY content_update ON public.contact_messages FOR UPDATE TO authenticated USING (public.current_admin_role() IN ('Super Admin','Admin','Editor')) WITH CHECK (public.current_admin_role() IN ('Super Admin','Admin','Editor'));
+CREATE POLICY content_delete ON public.contact_messages FOR DELETE TO authenticated USING (public.current_admin_role() IN ('Super Admin','Admin'));
+
+ALTER TABLE public.roadmap_phases ENABLE ROW LEVEL SECURITY;
+DO $$ DECLARE p record; BEGIN
+  FOR p IN SELECT policyname FROM pg_policies WHERE schemaname='public' AND tablename='roadmap_phases' LOOP
+    EXECUTE format('DROP POLICY %I ON public.roadmap_phases', p.policyname);
+  END LOOP;
+END $$;
+REVOKE ALL ON public.roadmap_phases FROM anon, authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.roadmap_phases TO authenticated;
+GRANT SELECT ON public.roadmap_phases TO anon;
+CREATE POLICY catalog_read ON public.roadmap_phases FOR SELECT TO anon, authenticated USING (true);
+CREATE POLICY content_insert ON public.roadmap_phases FOR INSERT TO authenticated WITH CHECK (public.current_admin_role() IN ('Super Admin','Admin','Editor'));
+CREATE POLICY content_update ON public.roadmap_phases FOR UPDATE TO authenticated USING (public.current_admin_role() IN ('Super Admin','Admin','Editor')) WITH CHECK (public.current_admin_role() IN ('Super Admin','Admin','Editor'));
+CREATE POLICY content_delete ON public.roadmap_phases FOR DELETE TO authenticated USING (public.current_admin_role() IN ('Super Admin','Admin'));
+
+-- Invoker security keeps table RLS active; parent and children save atomically.
+CREATE OR REPLACE FUNCTION public.save_projects(payload jsonb) RETURNS uuid
+LANGUAGE plpgsql SECURITY INVOKER SET search_path=public AS $$
+DECLARE entity_id uuid; current_row jsonb; merged jsonb;
+BEGIN
+  IF public.current_admin_role() IS NULL THEN RAISE EXCEPTION 'Administrator profile required'; END IF;
+  entity_id := COALESCE(NULLIF(payload->>'id','')::uuid, gen_random_uuid());
+  SELECT to_jsonb(t) INTO current_row FROM public.projects t WHERE id=entity_id FOR UPDATE;
+  merged := COALESCE(current_row, '{}'::jsonb) || payload || jsonb_build_object('id',entity_id);
+  merged := merged || jsonb_build_object('research_area_id',NULLIF(merged->>'research_area_id',''));
+  merged := merged || jsonb_build_object('project_leader_id',NULLIF(merged->>'project_leader_id',''));
+  INSERT INTO public.projects (id,title,slug,short_description,description,cover_image,start_year,end_year,status,research_area_id,project_leader_id,funding_source,partners,technologies,objectives,outcomes,demo_url,github_url,document_url,is_featured)
+  SELECT id,title,slug,short_description,description,cover_image,start_year,end_year,status,research_area_id,project_leader_id,funding_source,partners,technologies,objectives,outcomes,demo_url,github_url,document_url,is_featured FROM jsonb_populate_record(NULL::public.projects, merged)
+  ON CONFLICT (id) DO UPDATE SET title=EXCLUDED.title,slug=EXCLUDED.slug,short_description=EXCLUDED.short_description,description=EXCLUDED.description,cover_image=EXCLUDED.cover_image,start_year=EXCLUDED.start_year,end_year=EXCLUDED.end_year,status=EXCLUDED.status,research_area_id=EXCLUDED.research_area_id,project_leader_id=EXCLUDED.project_leader_id,funding_source=EXCLUDED.funding_source,partners=EXCLUDED.partners,technologies=EXCLUDED.technologies,objectives=EXCLUDED.objectives,outcomes=EXCLUDED.outcomes,demo_url=EXCLUDED.demo_url,github_url=EXCLUDED.github_url,document_url=EXCLUDED.document_url,is_featured=EXCLUDED.is_featured, updated_at=NOW();
+
+  IF payload ? 'gallery' THEN
+    DELETE FROM public.project_gallery WHERE project_id=entity_id;
+    INSERT INTO public.project_gallery(project_id,image_url,caption,display_order)
+    SELECT entity_id, value->>'image_url', value->>'caption', ordinality::int FROM jsonb_array_elements(payload->'gallery') WITH ORDINALITY;
+  END IF;
+  IF payload ? 'team_members' THEN
+    DELETE FROM public.project_members WHERE project_id=entity_id;
+    INSERT INTO public.project_members(project_id,member_id,role)
+    SELECT entity_id, (value->>'id')::uuid, value->>'role' FROM jsonb_array_elements(payload->'team_members');
+  END IF;
+  RETURN entity_id;
+END $$;
+REVOKE ALL ON FUNCTION public.save_projects(jsonb) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.save_projects(jsonb) TO authenticated;
+
+-- Invoker security keeps table RLS active; parent and children save atomically.
+CREATE OR REPLACE FUNCTION public.save_publications(payload jsonb) RETURNS uuid
+LANGUAGE plpgsql SECURITY INVOKER SET search_path=public AS $$
+DECLARE entity_id uuid; current_row jsonb; merged jsonb;
+BEGIN
+  IF public.current_admin_role() IS NULL THEN RAISE EXCEPTION 'Administrator profile required'; END IF;
+  entity_id := COALESCE(NULLIF(payload->>'id','')::uuid, gen_random_uuid());
+  SELECT to_jsonb(t) INTO current_row FROM public.publications t WHERE id=entity_id FOR UPDATE;
+  merged := COALESCE(current_row, '{}'::jsonb) || payload || jsonb_build_object('id',entity_id);
+  merged := merged || jsonb_build_object('research_area_id',NULLIF(merged->>'research_area_id',''));
+
+  INSERT INTO public.publications (id,title,slug,abstract,publication_type,journal_or_conference,publisher,publication_year,volume,issue,pages,doi,keywords,pdf_url,external_url,bibtex,research_area_id,is_featured)
+  SELECT id,title,slug,abstract,publication_type,journal_or_conference,publisher,publication_year,volume,issue,pages,doi,keywords,pdf_url,external_url,bibtex,research_area_id,is_featured FROM jsonb_populate_record(NULL::public.publications, merged)
+  ON CONFLICT (id) DO UPDATE SET title=EXCLUDED.title,slug=EXCLUDED.slug,abstract=EXCLUDED.abstract,publication_type=EXCLUDED.publication_type,journal_or_conference=EXCLUDED.journal_or_conference,publisher=EXCLUDED.publisher,publication_year=EXCLUDED.publication_year,volume=EXCLUDED.volume,issue=EXCLUDED.issue,pages=EXCLUDED.pages,doi=EXCLUDED.doi,keywords=EXCLUDED.keywords,pdf_url=EXCLUDED.pdf_url,external_url=EXCLUDED.external_url,bibtex=EXCLUDED.bibtex,research_area_id=EXCLUDED.research_area_id,is_featured=EXCLUDED.is_featured, updated_at=NOW();
+
+  IF payload ? 'authors' THEN
+    DELETE FROM public.publication_authors WHERE publication_id=entity_id;
+    INSERT INTO public.publication_authors(publication_id,external_author_name,author_order)
+    SELECT entity_id, value, ordinality::int FROM jsonb_array_elements_text(payload->'authors') WITH ORDINALITY;
+  END IF;
+  RETURN entity_id;
+END $$;
+REVOKE ALL ON FUNCTION public.save_publications(jsonb) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.save_publications(jsonb) TO authenticated;
+NOTIFY pgrst, 'reload schema';
+COMMIT;

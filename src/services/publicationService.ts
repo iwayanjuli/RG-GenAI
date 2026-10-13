@@ -4,15 +4,19 @@ import { getStoredData, setStoredData, STORAGE_KEYS } from './storage';
 import { initialPublications } from '../data/mockData';
 import { slugify, generateUUID } from '../lib/utils';
 
+const mapRow = ({ research_area, publication_authors, ...row }: any): Publication => ({ ...row, research_area_title: research_area?.title, authors: (publication_authors || []).sort((a: any,b: any) => a.author_order-b.author_order).map((entry: any) => entry.member?.name || entry.external_author_name).filter(Boolean) });
+
+const selection = '*, research_area:research_areas(title), publication_authors(author_order,external_author_name,member:members(name))';
+
 export const publicationService = {
   async getAll(): Promise<Publication[]> {
     if (isSupabaseConfigured && supabase) {
       const { data, error } = await supabase
         .from('publications')
-        .select('*')
+        .select(selection)
         .order('publication_year', { ascending: false });
       if (error) throw error;
-      return data as Publication[];
+      return (data || []).map(mapRow);
     }
     return getStoredData<Publication[]>(STORAGE_KEYS.PUBLICATIONS, initialPublications);
   },
@@ -36,13 +40,11 @@ export const publicationService = {
     };
 
     if (isSupabaseConfigured && supabase) {
-      const { data, error } = await supabase
-        .from('publications')
-        .insert([newPub])
-        .select()
-        .single();
+      const { error } = await supabase.rpc('save_publications', { payload: newPub });
       if (error) throw error;
-      return data as Publication;
+      const { data, error: readError } = await supabase.from('publications').select(selection).eq('id', newPub.id).single();
+      if (readError) throw readError;
+      return mapRow(data);
     }
 
     const current = getStoredData<Publication[]>(STORAGE_KEYS.PUBLICATIONS, initialPublications);
@@ -53,14 +55,11 @@ export const publicationService = {
 
   async update(id: string, updates: Partial<Publication>): Promise<Publication> {
     if (isSupabaseConfigured && supabase) {
-      const { data, error } = await supabase
-        .from('publications')
-        .update(updates)
-        .eq('id', id)
-        .select()
-        .single();
+      const { error } = await supabase.rpc('save_publications', { payload: { ...updates, id } });
       if (error) throw error;
-      return data as Publication;
+      const { data, error: readError } = await supabase.from('publications').select(selection).eq('id', id).single();
+      if (readError) throw readError;
+      return mapRow(data);
     }
 
     const current = getStoredData<Publication[]>(STORAGE_KEYS.PUBLICATIONS, initialPublications);
